@@ -1,0 +1,1 @@
+It allows you to convert subtitle formats using the console
