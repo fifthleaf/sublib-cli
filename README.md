@@ -4,7 +4,10 @@ Offline Sub Converter allows you to change subtitle formats using the command sh
 
 ## Installation
 
-This program uses an external module. You can install it with the command:
+This program uses an external module:
+- chardet
+
+You can install it with the command:
 
 ```bash
 pip install -r requirements.txt
@@ -18,29 +21,15 @@ pip install --user -r requirements.txt
 
 ## Usage
 
-Run:
+To convert, type:
 
 ```bash
-python sub_converter.py
+python sub_converter.py "path" format_from format_to
 ```
 
-Usage inside script:
-
-```bash
-convert [path] [format_from] [format_to]
-```
-
-For help:
-
-```bash
-help
-```
-
-For exit:
-
-```bash
-exit
-```
+path 		- Directory or single file to convert\
+format_from - Format of your file(s)\
+format_to 	- Target format
 
 ## Supported formats
 

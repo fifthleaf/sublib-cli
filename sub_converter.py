@@ -3,31 +3,41 @@ import re
 import sys
 import datetime as dt
 import chardet as chdt
+import argparse as arps
 
 
-def input_slice(inp):
-    # Slice elements from input
+def parser():
+    # Parses given arguments
 
-    pos, new_inp, index = 0, inp, []
+    parser = arps.ArgumentParser(
+        usage='sub_converter.py [-h] path form_from form_to',
+        description='Offline Sub Converter allows you to change subtitle formats using the command shell.',
+        epilog='Supported formats: mpl, srt, sub, tmp'
+    )
 
-    for x in inp:
-        if x == '"':
-            if len(index) == 0:
-                index.append(pos)
-            elif len(index) == 1:
-                index.append(pos)
-                old = inp[index[0] + 1:index[1]]
-                new = inp[index[0] + 1:index[1]].replace(' ', '?')
-                new_inp = inp.replace(old, new)
-                index = []
-        pos += 1
+    parser.add_argument(
+        'path',
+        type=str,
+        metavar='path',
+        help='Directory or single file to convert'
+    )
+    parser.add_argument(
+        'form_from',
+        type=str,
+        choices=['mpl', 'srt', 'sub', 'tmp'],
+        metavar='form_from',
+        help='Format of your file(s)'
+    )
+    parser.add_argument(
+        'form_to',
+        type=str,
+        choices=['mpl', 'srt', 'sub', 'tmp'],
+        metavar='form_to',
+        help='Target format'
+    )
 
-    new_inp = new_inp.replace('"', '').split()
-
-    for x, n_i in enumerate(new_inp):
-        new_inp[x] = n_i.replace('?', ' ')
-
-    return new_inp
+    args = parser.parse_args()
+    return (args.path, args.form_from, args.form_to)
 
 
 def from_mpl(path_file):
@@ -213,173 +223,128 @@ def to_tmp(path_file, lines, enc):
 
 
 def main():
+    # Main function, run script
 
-    inp = input_slice(input('Enter command:'))
+    # Parses arguments to tuple
+    inp = parser()
 
+    # Set path
+    path = inp[0]
+
+    # Normalize path
+    path = os.path.normpath(path)
+    path = os.path.normcase(path)
+    path = os.path.abspath(path)
+
+    # Check if path exist
     try:
-        command = inp[0]
-    except IndexError:
-        print('Please enter the command')
-        main()
+        if os.path.exists(path) is False:
+            raise Exception
+    except Exception:
+        print('The entered path does not exists')
+        sys.exit()
 
-    if command == 'convert':
-
-        try:
-            path = inp[1]
-        except IndexError:
-            print('Insufficient number of parameters')
-            main()
-
-        path = os.getcwd() if path == '\\' else path
-
-        path = os.path.normpath(path)
-        path = os.path.normcase(path)
-        path = os.path.abspath(path)
+    # Check files extensions
+    if os.path.isfile(path):
 
         try:
-            if os.path.exists(path) is False:
+            if os.path.splitext(path)[1] not in ('.srt', '.sub', '.txt'):
                 raise Exception
         except Exception:
-            print('The entered path does not exists')
-            main()
+            print('You cannot convert this file')
+            sys.exit()
 
-        if os.path.isfile(path):
+        files = [path]
 
-            try:
-                if os.path.splitext(path)[1] not in ('.srt', '.sub', '.txt'):
-                    raise Exception
-            except Exception:
-                print('You cannot convert this file')
-                main()
+    elif os.path.isdir(path):
 
-            files = [path]
+        files = list(os.walk(path))[0][2]
 
-        elif os.path.isdir(path):
-
-            files = list(os.walk(path))[0][2]
-
-            for file in files:
-                if os.path.splitext(file)[1] not in ('.srt', '.sub', '.txt'):
-                    files.remove(file)
-
-            try:
-                if len(files) == 0:
-                    raise Exception
-            except Exception:
-                print('There are no valid files in the path')
-                main()
-
-            for x, file in enumerate(files):
-                files[x] = path + '\\' + file
-
-        else:
-
-            print('Invalid path')
-            main()
+        for file in files:
+            if os.path.splitext(file)[1] not in ('.srt', '.sub', '.txt'):
+                files.remove(file)
 
         try:
-            form_from, form_to = inp[2], inp[3]
-        except IndexError:
-            print('Insufficient number of parameters')
-            main()
+            if len(files) == 0:
+                raise Exception
+        except Exception:
+            print('There are no valid files in the path')
+            sys.exit()
 
-        lines, encodings = [], []
-
-        if form_from == 'mpl':
-
-            for file in files:
-                tmp = from_mpl(file)
-                lines.append(tmp[0])
-                encodings.append(tmp[1])
-
-        elif form_from == 'srt':
-
-            for file in files:
-                tmp = from_srt(file)
-                lines.append(tmp[0])
-                encodings.append(tmp[1])
-
-        elif form_from == 'sub':
-
-            for file in files:
-                tmp = from_sub(file)
-                lines.append(tmp[0])
-                encodings.append(tmp[1])
-
-        elif form_from == 'tmp':
-
-            for file in files:
-                tmp = from_tmp(file)
-                lines.append(tmp[0])
-                encodings.append(tmp[1])
-
-        else:
-
-            print('Undefined \'from\' type')
-            main()
-
-        if form_to == 'mpl':
-
-            for parameters in zip(files, lines, encodings):
-                to_mpl(*parameters)
-
-        elif form_to == 'srt':
-
-            for parameters in zip(files, lines, encodings):
-                to_srt(*parameters)
-
-        elif form_to == 'sub':
-
-            for parameters in zip(files, lines, encodings):
-                to_sub(*parameters)
-
-        elif form_to == 'tmp':
-
-            for parameters in zip(files, lines, encodings):
-                to_tmp(*parameters)
-
-        else:
-
-            print('Undefined \'to\' type')
-            main()
-
-    elif command == 'help':
-
-        print('''
-README
-
-Supported subtitle format:
-    srt (SubRip), sub (MicroDVD), mpl (MPlayer2), tmp (TMPlayer)
-
-Supported subtitle extensions:
-    .srt, .sub, .txt (for mpl and tmp)
-
-To convert:
-    file:   convert -file- -format- -format-
-    dir:    convert -dir- -format- -format-
-    eg:     convert "D:\\Video" sub srt
-
-To exit:
-    exit
-
-To display help:
-    help
-''')
-
-    elif command == 'exit':
-
-        sys.exit()
+        for x, file in enumerate(files):
+            files[x] = path + '\\' + file
 
     else:
 
-        print('Undefined command')
-        main()
+        print('Invalid path')
+        sys.exit()
+
+    # Set form_from, form_to
+    form_from, form_to = inp[1], inp[2]
+
+    # Set lists for lines and encodings of files
+    lines, encodings = [], []
+
+    # Convert given format to CSV
+    if form_from == 'mpl':
+
+        for file in files:
+            tmp = from_mpl(file)
+            lines.append(tmp[0])
+            encodings.append(tmp[1])
+
+    elif form_from == 'srt':
+
+        for file in files:
+            tmp = from_srt(file)
+            lines.append(tmp[0])
+            encodings.append(tmp[1])
+
+    elif form_from == 'sub':
+
+        for file in files:
+            tmp = from_sub(file)
+            lines.append(tmp[0])
+            encodings.append(tmp[1])
+
+    elif form_from == 'tmp':
+
+        for file in files:
+            tmp = from_tmp(file)
+            lines.append(tmp[0])
+            encodings.append(tmp[1])
+
+    # Convert CSV to new format
+    if form_to == 'mpl':
+
+        for parameters in zip(files, lines, encodings):
+            to_mpl(*parameters)
+
+    elif form_to == 'srt':
+
+        for parameters in zip(files, lines, encodings):
+            to_srt(*parameters)
+
+    elif form_to == 'sub':
+
+        for parameters in zip(files, lines, encodings):
+            to_sub(*parameters)
+
+    elif form_to == 'tmp':
+
+        for parameters in zip(files, lines, encodings):
+            to_tmp(*parameters)
 
 
 if __name__ == '__main__':
-    while True:
-        try:
-            main()
-        except Exception:
-            print('An unknown error has occurred:')
-            print(sys.exc_info())
+
+    try:
+
+        main()
+        sys.exit()
+
+    except Exception:
+
+        print('An unknown error has occurred:')
+        print(sys.exc_info())
+        sys.exit()
