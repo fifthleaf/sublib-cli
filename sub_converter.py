@@ -43,18 +43,28 @@ def parser():
 def from_mpl(path_file):
     # Convert MPL to general list
 
+    # Get file encoding
     lines, enc = [], chdt.detect(open(path_file, 'rb').read())['encoding']
 
+    # Make list of lines
+    # Split lines to: time_Start, time_stop, text
     with open(path_file, 'rt', encoding=enc, errors='ignore') as file:
         for x in file.readlines():
             line = x.rstrip('\n')
             line = line.split(']', 2)
             lines.append(line)
 
+    # Normalize lines
     for x in lines:
+
+        # Convert time to timedelta object
         x[0] = dt.timedelta(seconds=round(float(x[0].replace('[', '')) / 10, 1))
         x[1] = dt.timedelta(seconds=round(float(x[1].replace('[', '')) / 10, 1))
+
+        # Change 'break line' format
         x[2] = x[2].replace('|', '\n').lstrip()
+
+        # Find and remove subtitle style
         styles = re.findall(r'/[.*/]', x[2])
         for y in styles:
             x[2] = x[2].replace(y, '')
@@ -65,8 +75,11 @@ def from_mpl(path_file):
 def from_srt(path_file):
     # Convert SRT to general list
 
+    # Get file encoding
     lines, enc = [], chdt.detect(open(path_file, 'rb').read())['encoding']
 
+    # Make list of lines
+    # Split lines to: number, time, text
     with open(path_file, 'rt', encoding=enc, errors='ignore') as file:
         tmp, i = [], iter(file)
         while True:
@@ -84,19 +97,29 @@ def from_srt(path_file):
             except StopIteration:
                 break
 
+    # Normalize lines
     new_lines = []
     for x in lines:
+
+        # Split time to: time_Start, time_end
         start, end = x[1].split(' --> ')
+
+        # Change time format
         start = dt.datetime.strptime(start, '%H:%M:%S,%f')
         end = dt.datetime.strptime(end, '%H:%M:%S,%f')
+
+        # Convert time to timedelta object
         start = dt.timedelta(hours=start.hour, minutes=start.minute, seconds=start.second, microseconds=start.microsecond)
         end = dt.timedelta(hours=end.hour, minutes=end.minute, seconds=end.second, microseconds=end.microsecond)
+
+        # Find and remove subtitle style
         styles = re.findall(r'</.*>', x[2])
         for y in styles:
             x[2] = x[2].replace(y, '')
         styles = re.findall(r'<.*>', x[2])
         for y in styles:
             x[2] = x[2].replace(y, '')
+
         new_lines.append([start, end, x[2]])
 
     return new_lines, enc
@@ -105,8 +128,11 @@ def from_srt(path_file):
 def from_sub(path_file):
     # Convert SUB to general list
 
+    # Get file encoding
     lines, enc = [], chdt.detect(open(path_file, 'rb').read())['encoding']
 
+    # Make list of lines
+    # Split lines to: time_Start, time_stop, text
     with open(path_file, 'rt', encoding=enc, errors='ignore') as file:
         for x in file.readlines():
             line = x.replace('\ufeff', '')
@@ -114,10 +140,17 @@ def from_sub(path_file):
             line = line.split('}', 2)
             lines.append(line)
 
+    # Normalize lines
     for x in lines:
+
+        # Convert time to timedelta object
         x[0] = dt.timedelta(seconds=round(float(x[0].replace('{', '')) / 23.976, 3))
         x[1] = dt.timedelta(seconds=round(float(x[1].replace('{', '')) / 23.976, 3))
+
+        # Change 'break line' format
         x[2] = x[2].replace('|', '\n')
+
+        # Find and remove subtitle style
         styles = re.findall(r'{.*}', x[2])
         for y in styles:
             x[2] = x[2].replace(y, '')
@@ -128,8 +161,11 @@ def from_sub(path_file):
 def from_tmp(path_file):
     # Convert TMP to general list
 
+    # Get file encoding
     lines, enc = [], chdt.detect(open(path_file, 'rb').read())['encoding']
 
+    # Make list of lines
+    # Split lines to: time_Start, time_stop, text
     with open(path_file, 'rt', encoding=enc, errors='ignore') as file:
         for x in file.readlines():
             tmp = x.rstrip('\n')
@@ -138,26 +174,40 @@ def from_tmp(path_file):
             line = [start, end, tmp[3]]
             lines.append(line)
 
+    # Normalize lines
     for x in lines:
+
+        # Change time format
         x[0] = dt.datetime.strptime(x[0], '%H:%M:%S')
         x[1] = dt.datetime.strptime(x[1], '%H:%M:%S')
+
+        # Convert time to timedelta object
         x[0] = dt.timedelta(hours=x[0].hour, minutes=x[0].minute, seconds=x[0].second, microseconds=x[0].microsecond)
         x[1] = dt.timedelta(hours=x[1].hour, minutes=x[1].minute, seconds=x[1].second + 1, microseconds=x[1].microsecond)
+
+        # Change 'break line' format
         x[2] = x[2].replace('|', '\n')
 
     return lines, enc
 
 
 def to_mpl(path_file, lines, enc):
-    # Convert general list to MLP
+    # Convert general list to MPL
 
+    # Normalize lines to MPL
     new_lines = []
     for x in lines:
+
+        # Change time format
         start = round(x[0].total_seconds() * 10)
         end = round(x[1].total_seconds() * 10)
-        text = x[2].replace('\n', '|')
-        new_lines.append('[' + f'{start}' + '][' + f'{end}' + ']' + f' {text}')
 
+        # Change 'break line' format
+        text = x[2].replace('\n', '|')
+
+        new_lines.append(f'[{start}][{end}] {text}')
+
+    # Write new file line by line
     with open(path_file[:path_file.rfind('.')] + '.txt', 'wt', encoding=enc, errors='ignore') as file:
         for x in new_lines:
             file.write(x + '\n')
@@ -166,23 +216,30 @@ def to_mpl(path_file, lines, enc):
 def to_srt(path_file, lines, enc):
     # Convert general list to SRT
 
+    # Normalize lines to SRT
     new_lines, num = [], 1
     for x in lines:
+
+        # Convert time to string
         start = str(x[0])
         end = str(x[1])
         if len(start) == 7:
             start = start + '.' + ''.zfill(6)
         if len(end) == 7:
             end = end + '.' + ''.zfill(6)
+
+        # Change time format
         start = dt.datetime.strptime(start, '%H:%M:%S.%f')
         end = dt.datetime.strptime(end, '%H:%M:%S.%f')
         start = start.strftime('%H:%M:%S.%f').replace('.', ',')
         end = end.strftime('%H:%M:%S.%f').replace('.', ',')
         start = start[:len(start) - 3]
         end = end[:len(end) - 3]
-        new_lines.append(str(num) + '\n' + f'{start} --> {end}' + '\n' + x[2] + '\n')
+
+        new_lines.append(f'{num}\n{start} --> {end}\n{x[2]}\n')
         num += 1
 
+    # Write new file line by line
     with open(path_file[:path_file.rfind('.')] + '.srt', 'wt', encoding=enc, errors='ignore') as file:
         for x in new_lines:
             file.write(x + '\n')
@@ -191,13 +248,20 @@ def to_srt(path_file, lines, enc):
 def to_sub(path_file, lines, enc):
     # Convert general list to SUB
 
+    # Normalize lines to SUB
     new_lines = []
     for x in lines:
+
+        # Change time format
         start = round(x[0].total_seconds() * 23.976)
         end = round(x[1].total_seconds() * 23.976)
+
+        # Change 'break line' format
         text = x[2].replace('\n', '|')
+
         new_lines.append('{' + f'{start}' + '}{' + f'{end}' + '}' + f'{text}')
 
+    # Write new file line by line
     with open(path_file[:path_file.rfind('.')] + '.sub', 'wt', encoding=enc, errors='ignore') as file:
         for x in new_lines:
             file.write(x + '\n')
@@ -206,17 +270,26 @@ def to_sub(path_file, lines, enc):
 def to_tmp(path_file, lines, enc):
     # Convert general list to TMP
 
+    # Normalize lines to TMP
     new_lines = []
     for x in lines:
+
+        # Convert time to string
         start = str(x[0])
         if len(start) == 7:
             start = start + '.' + ''.zfill(6)
+
+        # Change time format
         start = dt.datetime.strptime(start, '%H:%M:%S.%f')
         start = start.strftime('%H:%M:%S.%f')
         start = start[:len(start) - 7]
+
+        # Change 'break line' format
         text = x[2].replace('\n', '|')
+
         new_lines.append(f'{start}:{text}')
 
+    # Write new file line by line
     with open(path_file[:path_file.rfind('.')] + '.txt', 'wt', encoding=enc, errors='ignore') as file:
         for x in new_lines:
             file.write(x + '\n')
@@ -233,7 +306,6 @@ def main():
 
     # Normalize path
     path = os.path.normpath(path)
-    path = os.path.normcase(path)
     path = os.path.abspath(path)
 
     # Check if path exist
@@ -271,8 +343,7 @@ def main():
             print('There are no valid files in the path')
             sys.exit()
 
-        for x, file in enumerate(files):
-            files[x] = path + '\\' + file
+        files = [file.replace(file, path + '\\' + file) for file in files]
 
     else:
 
