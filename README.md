@@ -24,11 +24,10 @@ pip install --user -r requirements.txt
 To convert, type:
 
 ```bash
-python sub_converter.py "path" format_from format_to
+python sub_converter.py "path" format_to
 ```
 
 path 		- Directory or single file to convert\
-format_from - Format of your file(s)\
 format_to 	- Target format
 
 ## Supported formats
