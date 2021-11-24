@@ -1,6 +1,6 @@
 <h1 align="center">Offline Sub Converter</h1>
 
-<p align="center">The CLI script made with Python for easy conversion of subtitles files</p>
+<p align="center">The CLI script made with Python for easy conversion of subtitles files.</p>
 
 <p  align="center">
 	<a style="text-decoration:none" href="https://github.com/TheFifthLeaf/offline-sub-converter/releases">
@@ -19,16 +19,16 @@
 
 ## Installation
 
-You will need an external module to use the .py script
+You will need an external module to use the .py script.
 - chardet
 
-You can install it throught the requirements file
+You can install it throught the requirements file.
 
 ```bash
 pip install -r requirements.txt
 ```
 
-If the installation fails due to lack of access rights, try this
+If the installation fails due to lack of access rights, try this.
 
 ```bash
 pip install --user -r requirements.txt
@@ -41,32 +41,43 @@ pip install --user -r requirements.txt
 To convert using .exe, please type:
 
 ```bash
-sub_converter.exe "path" format
+sub-converter [--help] [path form_to [--log <file>]]
 ```
 
 And using .py, type:
 
 ```bash
-python sub_converter.py "path" format
+python sub-converter.py [--help] [path form_to [--log <file>]]
 ```
 
 ### Usage example
 
-This will convert the specified file to SubRip format
+This will display help information. You can also use short "-h".
 ```bash
-sub_converter.exe "D:\Video\Se7en.sub" srt
+sub-converter --help
 ```
-This will convert all the subtitle files in the Video directory to MicroDVD format
+This will convert the specified file to SubRip format.
 ```bash
-sub_converter.exe "D:\Video" sub
+sub-converter "D:\Video\Se7en.sub" srt
 ```
-This will convert all the subtitle files in the current folder to MPlayer2 format
+This will convert all the subtitle files in the Video directory to MicroDVD format.
 ```bash
-sub_converter.exe "." mpl
+sub-converter "D:\Video" sub
 ```
-This will display help information
+This will convert all the subtitle files in the current folder to MPlayer2 format.
 ```bash
-sub_converter.exe -h
+sub-converter "." mpl
+```
+### Logging
+By default, the program creates logs only when it encounters a fatal error. You can change it as follows:
+
+This will additionally create a log file. You can also use short "-l".
+```bash
+sub-converter "D:\Video\Se7en.sub" srt --log
+```
+This will create a specified log file. You can also use short "-l".
+```bash
+sub-converter "D:\Video\Se7en.sub" srt --log "mylog.log"
 ```
 
 ## Supported formats
