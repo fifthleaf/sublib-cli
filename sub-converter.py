@@ -9,7 +9,7 @@ import sublib as sbl
 def parser():
     """Parses given arguments"""
     arg_parser = arps.ArgumentParser(
-        usage="sub_converter [--help] [path form_to [--log <file>]]",
+        usage="sub-converter [--help] [path form_to [--log <file>]]",
         description="Offline Sub Converter allows you to change subtitle formats using the command console.",
         epilog="Supported formats: mpl, srt, sub, tmp",
         formatter_class=lambda prog: arps.HelpFormatter(prog, max_help_position=52)
@@ -83,11 +83,11 @@ def main():
         if form is False:
             logger.critical("Cannot convert this file")
             sys.exit("Cannot convert this file")
-        logger.info("Correct file: " + str(path))
+        logger.info("Correct file: " + str(os.path.basename(path)))
         files = [path]
         form_from.append(form)
         encodings.append(encoding)
-        logger.info("Ready file: " + str(path))
+        logger.info("Ready file: " + str(os.path.basename(path)))
 
     elif os.path.isdir(path):
 
@@ -101,11 +101,11 @@ def main():
             form = sbl.detect(file, encoding)
             if form is False:
                 files.remove(file)
-                logger.info("Remove unsupported file: " + str(file))
+                logger.info("Remove unsupported file: " + str(os.path.basename(file)))
             else:
                 form_from.append(form)
                 encodings.append(encoding)
-                logger.info("Ready file: " + str(file))
+                logger.info("Ready file: " + str(os.path.basename(file)))
         if len(form_from) <= 0:
             logger.critical("No valid files in the path")
             sys.exit("No valid files in the path")
