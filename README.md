@@ -41,43 +41,43 @@ pip install --user -r requirements.txt
 To convert using .exe, please type:
 
 ```bash
-sub-converter [--help] [path form_to [--log <file>]]
+sub_converter [--help] [path form_to [--log <file>]]
 ```
 
 And using .py, type:
 
 ```bash
-python sub-converter.py [--help] [path form_to [--log <file>]]
+python sub_converter.py [--help] [path form_to [--log <file>]]
 ```
 
 ### Usage example
 
 This will display help information. You can also use short "-h".
 ```bash
-sub-converter --help
+sub_converter --help
 ```
 This will convert the specified file to SubRip format.
 ```bash
-sub-converter "D:\Video\Se7en.sub" srt
+sub_converter "D:\Video\Se7en.sub" srt
 ```
 This will convert all the subtitle files in the Video directory to MicroDVD format.
 ```bash
-sub-converter "D:\Video" sub
+sub_converter "D:\Video" sub
 ```
 This will convert all the subtitle files in the current folder to MPlayer2 format.
 ```bash
-sub-converter "." mpl
+sub_converter "." mpl
 ```
 ### Logging
 By default, the program creates logs only when it encounters a fatal error. You can change it as follows:
 
 This will additionally create a log file. You can also use short "-l".
 ```bash
-sub-converter "D:\Video\Se7en.sub" srt --log
+sub_converter "D:\Video\Se7en.sub" srt --log
 ```
 This will create a specified log file. You can also use short "-l".
 ```bash
-sub-converter "D:\Video\Se7en.sub" srt --log "mylog.log"
+sub_converter "D:\Video\Se7en.sub" srt --log "mylog.log"
 ```
 
 ## Supported formats
