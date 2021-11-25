@@ -39,6 +39,21 @@ def parser():
     return (args.path, args.form_to, args.log)
 
 
+def check_file(path_file, path_files, forms_from, encodings, logger):
+    """Check if file is correct"""
+    with open(path_file, "rb") as f:
+        encoding = chdt.detect(f.read())["encoding"]
+    logger.info("Encoding detected: " + str(encoding))
+    form = sbl.detect(path_file, encoding)
+    if form is False:
+        path_files.remove(path_file)
+        logger.info("Invalid file: " + str(os.path.basename(path_file)))
+    else:
+        forms_from.append(form)
+        encodings.append(encoding)
+        logger.info("Correct file: " + str(os.path.basename(path_file)))
+
+
 def set_logger(path_file, lvl):
     """Set logger ready to use"""
     path_file = os.path.normpath(path_file)
@@ -48,7 +63,6 @@ def set_logger(path_file, lvl):
         format="[%(levelname)s][%(asctime)s][%(module)s.%(funcName)s] %(message)s",
         level=lvl
     )
-    lg.info("Set up logger")
     return lg.getLogger(__name__)
 
 
@@ -67,83 +81,62 @@ def main():
     else:
         logger = set_logger(log_file, lg.INFO)
 
+    logger.info("Logger setted up")
+
     if os.path.exists(path) is False:
         logger.critical("Entered path does not exists")
         sys.exit("Entered path does not exists")
+
     logger.info("Correct path: " + str(path))
 
-    form_from, encodings, lines_list = [], [], []
-
     if os.path.isfile(path):
-
-        with open(path, "rb") as f:
-            encoding = chdt.detect(f.read())["encoding"]
-            logger.info("Encoding detected: " + str(encoding))
-        form = sbl.detect(path, encoding)
-        if form is False:
-            logger.critical("Cannot convert this file")
-            sys.exit("Cannot convert this file")
-        logger.info("Correct file: " + str(os.path.basename(path)))
-        files = [path]
-        form_from.append(form)
-        encodings.append(encoding)
-        logger.info("Ready file: " + str(os.path.basename(path)))
-
+        path_files = [path]
     elif os.path.isdir(path):
+        path_files = list(os.walk(path))[0][2]
+        path_files = [path_file.replace(path_file, path + "\\" + path_file) for path_file in path_files]
 
-        files = list(os.walk(path))[0][2]
-        logger.info("File list: " + str(files))
-        files = [file.replace(file, path + "\\" + file) for file in files]
-        for file in files:
-            with open(file, "rb") as f:
-                encoding = chdt.detect(f.read())["encoding"]
-                logger.info("Encoding detected: " + str(encoding))
-            form = sbl.detect(file, encoding)
-            if form is False:
-                files.remove(file)
-                logger.info("Remove unsupported file: " + str(os.path.basename(file)))
-            else:
-                form_from.append(form)
-                encodings.append(encoding)
-                logger.info("Ready file: " + str(os.path.basename(file)))
-        if len(form_from) <= 0:
-            logger.critical("No valid files in the path")
-            sys.exit("No valid files in the path")
-        logger.info("All files ready")
+    logger.info(f"All files: {str([os.path.basename(path_file) for path_file in path_files])}")
 
-    for form, *param in zip(form_from, files, encodings):
+    forms_from, encodings = [], []
 
-        if form == "mpl":
-            new_file = sbl.from_mpl(*param)
-        elif form == "srt":
-            new_file = sbl.from_srt(*param)
-        elif form == "sub":
-            new_file = sbl.from_sub(*param)
-        elif form == "tmp":
-            new_file = sbl.from_tmp(*param)
-        lines_list.append(new_file)
+    for path_file in path_files:
+        check_file(path_file, path_files, forms_from, encodings, logger)
+
+    if len(path_files) <= 0:
+        logger.critical("No valid files in the path")
+        sys.exit("No valid files in the path")
+
+    logger.info(f"Valid files: {str([os.path.basename(path_file) for path_file in path_files])}")
+
+    general_lines = []
+
+    for form, path_file, encoding in zip(forms_from, path_files, encodings):
+        with open(path_file, "rt", encoding=encoding, errors="ignore") as file:
+            if form == "mpl":
+                new_lines = sbl.from_mpl(file, path_file)
+            elif form == "srt":
+                new_lines = sbl.from_srt(file, path_file)
+            elif form == "sub":
+                new_lines = sbl.from_sub(file, path_file)
+            elif form == "tmp":
+                new_lines = sbl.from_tmp(file, path_file)
+        general_lines.append(new_lines)
 
     logger.info("All files converted to general format")
 
     if form_to == "mpl":
-
-        for parameters in zip(files, lines_list, encodings):
-            sbl.to_mpl(*parameters)
-
+        formatted_lines = map(sbl.to_mpl, general_lines, path_files)
     elif form_to == "srt":
-
-        for parameters in zip(files, lines_list, encodings):
-            sbl.to_srt(*parameters)
-
+        formatted_lines = map(sbl.to_srt, general_lines, path_files)
     elif form_to == "sub":
-
-        for parameters in zip(files, lines_list, encodings):
-            sbl.to_sub(*parameters)
-
+        formatted_lines = map(sbl.to_sub, general_lines, path_files)
     elif form_to == "tmp":
+        formatted_lines = map(sbl.to_tmp, general_lines, path_files)
 
-        for parameters in zip(files, lines_list, encodings):
-            sbl.to_tmp(*parameters)
+    logger.info("All lines converted to desired format")
+
+    for parameters in zip(path_files, encodings, formatted_lines):
+        sbl.write(form_to, *parameters)
 
     logger.info("All files writed")
 

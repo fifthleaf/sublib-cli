@@ -29,13 +29,24 @@ def detect(path_file, encoding):
     return result
 
 
+def write(form_to, path_file, encoding, lines):
+    if form_to in ("mpl", "tmp"):
+        extension = "txt"
+    elif form_to in ("srt", "sub"):
+        extension = form_to
+    file_name = f"{path_file[:path_file.rfind('.')]}.{extension}"
+    with open(file_name, "wt", encoding=encoding, errors="ignore") as file:
+        for line in lines:
+            file.write(line + "\n")
+    logger.info(f"Write {form_to.upper()} to new .{extension} file: {os.path.basename(file_name)}")
+
+
 # MPL Functions
 
 
-def from_mpl(path_file, encoding):
+def from_mpl(file, path_file):
     """Convert MPL to general list"""
-    with open(path_file, "rt", encoding=encoding, errors="ignore") as file:
-        lines = [line.split("]", 2) for line in (line.rstrip("\n") for line in file)]
+    lines = [line.split("]", 2) for line in (line.rstrip("\n") for line in file)]
     for line in lines:
         line[0] = dt.timedelta(seconds=round(float(line[0].replace("[", "")) / 10.0, 1))   # MPL use as time: sec * 10
         line[1] = dt.timedelta(seconds=round(float(line[1].replace("[", "")) / 10.0, 1))
@@ -44,32 +55,27 @@ def from_mpl(path_file, encoding):
     return lines
 
 
-def to_mpl(path_file, lines, encoding):
+def to_mpl(lines, path_file):
     """Convert general list to MPL"""
     for line in lines:
         line[0] = round(line[0].total_seconds() * 10)   # MPL use as time: sec * 10
         line[1] = round(line[1].total_seconds() * 10)
-    formated_lines = [f"[{line[0]}][{line[1]}] {line[2]}" for line in lines]
     logger.info(f"Make MPL from general format: {str(os.path.basename(path_file))}")
-    with open(path_file[:path_file.rfind(".")] + ".txt", "wt", encoding=encoding, errors="ignore") as file:
-        for line in formated_lines:
-            file.write(line + "\n")
-        logger.info(f"Write MPL to new .txt file: {str(os.path.basename(path_file))}")
+    return [f"[{line[0]}][{line[1]}] {line[2]}" for line in lines]
 
 
 # SRT Functions
 
 
-def from_srt(path_file, encoding):
+def from_srt(file, path_file):
     """Convert SRT to general list"""
-    with open(path_file, "rt", encoding=encoding, errors="ignore") as file:
-        lines, temp = [], []
-        for line in file:
-            if line != "\n":
-                temp.append(line.rstrip("\n"))
-            else:
-                lines.append(temp)
-                temp = []
+    lines, temp = [], []
+    for line in file:
+        if line != "\n":
+            temp.append(line.rstrip("\n"))
+        else:
+            lines.append(temp)
+            temp = []
     lines = [[*line[1].split(" --> "), "|".join(line[2:])] for line in lines]
     for line in lines:
         line[0] = dt.datetime.strptime(line[0], "%H:%M:%S,%f")
@@ -84,7 +90,7 @@ def from_srt(path_file, encoding):
     return lines
 
 
-def to_srt(path_file, lines, encoding):
+def to_srt(lines, path_file):
     """Convert general list to SRT"""
     for line in lines:
         line[0] = str(line[0])
@@ -100,21 +106,16 @@ def to_srt(path_file, lines, encoding):
         line[0] = line[0][:len(line[0]) - 3]
         line[1] = line[1][:len(line[1]) - 3]
         line[2] = line[2].replace("|", "\n")
-    formated_lines = [f"{num}\n{line[0]} --> {line[1]}\n{line[2]}\n" for num, line in enumerate(lines, 1)]
     logger.info(f"Make SRT from general format: {str(os.path.basename(path_file))}")
-    with open(path_file[:path_file.rfind(".")] + ".srt", "wt", encoding=encoding, errors="ignore") as file:
-        for line in formated_lines:
-            file.write(line + "\n")
-        logger.info(f"Write SRT to new .srt file: {str(os.path.basename(path_file))}")
+    return [f"{num}\n{line[0]} --> {line[1]}\n{line[2]}\n" for num, line in enumerate(lines, 1)]
 
 
 # SUB Functions
 
 
-def from_sub(path_file, encoding):
+def from_sub(file, path_file):
     """Convert SUB to general list"""
-    with open(path_file, "rt", encoding=encoding, errors="ignore") as file:
-        lines = [line.split("}", 2) for line in (line.rstrip("\n") for line in file)]
+    lines = [line.split("}", 2) for line in (line.rstrip("\n") for line in file)]
     for line in lines:
         line[0] = dt.timedelta(seconds=round(float(line[0].replace("{", "")) / 23.976, 3))   # SUB use frames as time
         line[1] = dt.timedelta(seconds=round(float(line[1].replace("{", "")) / 23.976, 3))
@@ -124,27 +125,22 @@ def from_sub(path_file, encoding):
     return lines
 
 
-def to_sub(path_file, lines, encoding):
+def to_sub(lines, path_file):
     """Convert general list to SUB"""
     for line in lines:
         line[0] = round(line[0].total_seconds() * 23.976)   # SUB use frames as time
         line[1] = round(line[1].total_seconds() * 23.976)
-    formated_lines = [f"{{{line[0]}}}{{{line[1]}}}{line[2]}" for line in lines]
     logger.info(f"Make SUB from general format: {str(os.path.basename(path_file))}")
-    with open(path_file[:path_file.rfind(".")] + ".sub", "wt", encoding=encoding, errors="ignore") as file:
-        for line in formated_lines:
-            file.write(line + "\n")
-        logger.info(f"Write SUB to new .sub file: {str(os.path.basename(path_file))}")
+    return [f"{{{line[0]}}}{{{line[1]}}}{line[2]}" for line in lines]
 
 
 # TMP Functions
 
 
-def from_tmp(path_file, encoding):
+def from_tmp(file, path_file):
     """Convert TMP to general list"""
-    with open(path_file, "rt", encoding=encoding, errors="ignore") as file:
-        lines = [line.split(":", 3) for line in (line.rstrip("\n") for line in file)]
-        lines = [[f"{line[0]}:{line[1]}:{line[2]}", f"{line[0]}:{line[1]}:{line[2]}", line[3]] for line in lines]
+    lines = [line.split(":", 3) for line in (line.rstrip("\n") for line in file)]
+    lines = [[f"{line[0]}:{line[1]}:{line[2]}", f"{line[0]}:{line[1]}:{line[2]}", line[3]] for line in lines]
     for line in lines:
         line[0] = dt.datetime.strptime(line[0], "%H:%M:%S")
         line[1] = dt.datetime.strptime(line[1], "%H:%M:%S")
@@ -154,7 +150,7 @@ def from_tmp(path_file, encoding):
     return lines
 
 
-def to_tmp(path_file, lines, encoding):
+def to_tmp(lines, path_file):
     """Convert general list to TMP"""
     for line in lines:
         line[0] = str(line[0])
@@ -163,9 +159,5 @@ def to_tmp(path_file, lines, encoding):
         line[0] = dt.datetime.strptime(line[0], "%H:%M:%S.%f")
         line[0] = line[0].strftime("%H:%M:%S.%f")
         line[0] = line[0][:len(line[0]) - 7]
-    formated_lines = [f"{line[0]}:{line[2]}" for line in lines]
     logger.info(f"Make TMP from general format: {str(os.path.basename(path_file))}")
-    with open(path_file[:path_file.rfind(".")] + ".txt", "wt", encoding=encoding, errors="ignore") as file:
-        for line in formated_lines:
-            file.write(line + "\n")
-        logger.info(f"Write TMP to new .txt file: {str(os.path.basename(path_file))}")
+    return [f"{line[0]}:{line[2]}" for line in lines]
