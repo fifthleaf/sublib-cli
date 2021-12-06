@@ -13,7 +13,7 @@
 		<img src="https://img.shields.io/badge/license-GPL%20V3-3C7DD9" alt="License GPLv3">
 	</a>
 	<a href="https://www.codefactor.io/repository/github/thefifthleaf/offline-sub-converter">
-		<img src="https://img.shields.io/badge/codefactor-A%2B-3C7DD9" alt="CodeFactor" />
+		<img src="https://img.shields.io/codefactor/grade/github/TheFifthLeaf/offline-sub-converter/main?color=3C7DD9" alt="CodeFactor" />
 	</a>
 </p>
 
