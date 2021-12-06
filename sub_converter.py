@@ -1,8 +1,9 @@
 import os
 import sys
-import chardet as chdt
 import argparse as arps
 import logging as lg
+
+import chardet as chdt
 import sublib as sbl
 
 
@@ -66,9 +67,9 @@ def set_logger(path_file, lvl):
     return lg.getLogger(__name__)
 
 
-def main():
+def main(path, form_to, log_file):
+    """The main function of the program that control and performs all the actions."""
 
-    path, form_to, log_file = parser()
     path = os.path.normpath(path)
     path = os.path.abspath(path)
 
@@ -148,7 +149,7 @@ def main():
 if __name__ == "__main__":
 
     try:
-        main()
+        main(*parser())
     except Exception:
         print("An unknown error has occurred:")
         print(sys.exc_info())
