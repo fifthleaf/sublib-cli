@@ -4,7 +4,7 @@ import argparse as arps
 import logging as lg
 
 import chardet as chdt
-import sublib as sbl
+import lib.sublib as sbl
 
 
 def parser():
