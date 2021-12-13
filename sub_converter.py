@@ -10,7 +10,7 @@ import sublib as sbl
 def parser():
     """Parses given arguments"""
     arg_parser = arps.ArgumentParser(
-        usage="sub-converter [--help] [path form_to [--log <file>]]",
+        usage=f"{os.path.basename(__file__)} [--help] [path form_to [--log <file>]]",
         description="Offline Sub Converter allows you to change subtitle formats using the command console.",
         epilog="Supported formats: mpl, srt, sub, tmp",
         formatter_class=lambda prog: arps.HelpFormatter(prog, max_help_position=52)
