@@ -1,4 +1,4 @@
-<h1 align="center">Offline Sub Converter</h1>
+# <img src="logo.png" alt="Offline Sub Converter logo">
 
 <p align="center">The CLI script made with Python for easy conversion of subtitles files.</p>
 
