@@ -1,0 +1,17 @@
+# Testing
+.tox
+.pytest_cache
+tests_files
+
+# Packaging
+dist
+*.egg-info
+
+# Executing
+__pycache__
+
+# Environments
+venv
+
+# Other
+sub_converter.exe
