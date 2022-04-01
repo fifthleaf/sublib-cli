@@ -62,6 +62,20 @@ def get_file_encoding(file):
     return result["encoding"]
 
 
+def get_subtitle_object(subtitle):
+    file = subtitle["path"]
+    encoding = subtitle["encoding"]
+    if subtitle["format"] == "mpl":
+        subtitle = sublib.MPlayer2(file, encoding)
+    elif subtitle["format"] == "srt":
+        subtitle = sublib.SubRip(file, encoding)
+    elif subtitle["format"] == "sub":
+        subtitle = sublib.MicroDVD(file, encoding)
+    elif subtitle["format"] == "tmp":
+        subtitle = sublib.TMPlayer(file, encoding)
+    return subtitle
+
+
 def main(path, form_to, log):
 
     path = os.path.normpath(path)
@@ -86,6 +100,9 @@ def main(path, form_to, log):
         subtitle.update({
             "format": sublib.detect(file, encoding)
         })
+
+    for i, subtitle in enumerate(subtitles):
+        subtitles[i] = get_subtitle_object(subtitle)
 
 
 if __name__ == "__main__":
