@@ -1,1 +1,2 @@
 chardet==4.0.0
+sublib==1.2.0
