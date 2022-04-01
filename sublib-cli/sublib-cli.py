@@ -41,3 +41,16 @@ def parser():
     )
     args = arg_parser.parse_args()
     return (args.path, args.form_to, args.log)
+
+
+def main(path, form_to, log):
+    pass
+
+
+if __name__ == "__main__":
+
+    try:
+        main(*parser())
+    except Exception:
+        print("An unknown error has occurred:")
+        print(sys.exc_info())
