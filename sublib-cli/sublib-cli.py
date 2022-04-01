@@ -43,10 +43,30 @@ def parser():
     return (args.path, args.form_to, args.log)
 
 
+def get_files_from_path(path):
+    if os.path.isfile(path):
+        files = [path]
+    if os.path.isdir(path):
+        files = list(os.walk(path))
+        files = [
+            file.replace(file, path + "\\" + file)
+            for file in files[0][2]
+        ]
+    return files
+
+
 def main(path, form_to, log):
 
     path = os.path.normpath(path)
     path = os.path.abspath(path)
+
+    if os.path.exists(path) is False:
+        exit()
+
+    subtitles = [
+        {"path": file}
+        for file in get_files_from_path(path)
+    ]
 
 
 if __name__ == "__main__":
