@@ -80,6 +80,13 @@ def main(path, form_to, log):
             "encoding": get_file_encoding(subtitle["path"])
         })
 
+    for subtitle in subtitles:
+        file = subtitle["path"]
+        encoding = subtitle["encoding"]
+        subtitle.update({
+            "format": sublib.detect(file, encoding)
+        })
+
 
 if __name__ == "__main__":
 
