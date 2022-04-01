@@ -55,6 +55,13 @@ def get_files_from_path(path):
     return files
 
 
+def get_file_encoding(file):
+    with open(file, "rb") as f:
+        file_content = f.read()
+    result = chardet.detect(file_content)
+    return result["encoding"]
+
+
 def main(path, form_to, log):
 
     path = os.path.normpath(path)
@@ -67,6 +74,11 @@ def main(path, form_to, log):
         {"path": file}
         for file in get_files_from_path(path)
     ]
+
+    for subtitle in subtitles:
+        subtitle.update({
+            "encoding": get_file_encoding(subtitle["path"])
+        })
 
 
 if __name__ == "__main__":
