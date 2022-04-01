@@ -44,7 +44,9 @@ def parser():
 
 
 def main(path, form_to, log):
-    pass
+
+    path = os.path.normpath(path)
+    path = os.path.abspath(path)
 
 
 if __name__ == "__main__":
