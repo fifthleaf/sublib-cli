@@ -43,7 +43,7 @@ def parser():
     return (args.path, args.form_to, args.log)
 
 
-def get_files_from_path(path):
+def find_files(path):
     if os.path.isfile(path):
         files = [path]
     if os.path.isdir(path):
@@ -55,7 +55,7 @@ def get_files_from_path(path):
     return files
 
 
-def get_file_encoding(file):
+def detect_encoding(file):
     with open(file, "rb") as f:
         file_content = f.read()
     result = chardet.detect(file_content)
@@ -63,7 +63,7 @@ def get_file_encoding(file):
     return result
 
 
-def get_subtitle_object(subtitle):
+def get_subtitle(subtitle):
     data = (subtitle["path"], subtitle["encoding"])
     if subtitle["format"] == "mpl":
         subtitle = sublib.MPlayer2(*data)
@@ -76,6 +76,16 @@ def get_subtitle_object(subtitle):
     return subtitle
 
 
+def get_new_path(file, form):
+    path = file["path"]
+    path = path[:path.rfind(".")]
+    if form in ("mpl", "tmp"):
+        path = f"{path}.txt"
+    elif form in ("srt", "sub"):
+        path = f"{path}.{form}"
+    return path
+
+
 def main(path, form_to, log):
 
     path = os.path.normpath(path)
@@ -84,23 +94,23 @@ def main(path, form_to, log):
     if os.path.exists(path) is False:
         exit()
 
-    subtitles_details = [
-        {"path": file}
-        for file in get_files_from_path(path)
-    ]
-    for subtitle in subtitles_details:
-        subtitle.update(
-            {"encoding": get_file_encoding(subtitle["path"])}
-        )
-    for subtitle in subtitles_details:
-        subtitle.update(
-            {"format": sublib.detect(subtitle["path"], subtitle["encoding"])}
-        )
+    input_files = []
+    for file in find_files(path):
+        input_files.append({
+            "path": file,
+            "encoding": detect_encoding(file),
+            "format": sublib.detect(file, detect_encoding(file))
+        })
 
-    subtitles_input = [
-        get_subtitle_object(subtitle)
-        for subtitle in subtitles_details
-    ]
+    output_files = []
+    for file in input_files:
+        output_files.append({
+            "path": get_new_path(file, form_to),
+            "encoding": file["encoding"],
+            "format": form_to
+        })
+
+    input_subtitles = [get_subtitle(file) for file in input_files]
 
 
 if __name__ == "__main__":
