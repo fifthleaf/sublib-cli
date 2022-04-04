@@ -59,20 +59,20 @@ def get_file_encoding(file):
     with open(file, "rb") as f:
         file_content = f.read()
     result = chardet.detect(file_content)
-    return result["encoding"]
+    result = result["encoding"]
+    return result
 
 
 def get_subtitle_object(subtitle):
-    file = subtitle["path"]
-    encoding = subtitle["encoding"]
+    data = (subtitle["path"], subtitle["encoding"])
     if subtitle["format"] == "mpl":
-        subtitle = sublib.MPlayer2(file, encoding)
+        subtitle = sublib.MPlayer2(*data)
     elif subtitle["format"] == "srt":
-        subtitle = sublib.SubRip(file, encoding)
+        subtitle = sublib.SubRip(*data)
     elif subtitle["format"] == "sub":
-        subtitle = sublib.MicroDVD(file, encoding)
+        subtitle = sublib.MicroDVD(*data)
     elif subtitle["format"] == "tmp":
-        subtitle = sublib.TMPlayer(file, encoding)
+        subtitle = sublib.TMPlayer(*data)
     return subtitle
 
 
@@ -84,25 +84,23 @@ def main(path, form_to, log):
     if os.path.exists(path) is False:
         exit()
 
-    subtitles = [
+    subtitles_details = [
         {"path": file}
         for file in get_files_from_path(path)
     ]
+    for subtitle in subtitles_details:
+        subtitle.update(
+            {"encoding": get_file_encoding(subtitle["path"])}
+        )
+    for subtitle in subtitles_details:
+        subtitle.update(
+            {"format": sublib.detect(subtitle["path"], subtitle["encoding"])}
+        )
 
-    for subtitle in subtitles:
-        subtitle.update({
-            "encoding": get_file_encoding(subtitle["path"])
-        })
-
-    for subtitle in subtitles:
-        file = subtitle["path"]
-        encoding = subtitle["encoding"]
-        subtitle.update({
-            "format": sublib.detect(file, encoding)
-        })
-
-    for i, subtitle in enumerate(subtitles):
-        subtitles[i] = get_subtitle_object(subtitle)
+    subtitles_input = [
+        get_subtitle_object(subtitle)
+        for subtitle in subtitles_details
+    ]
 
 
 if __name__ == "__main__":
