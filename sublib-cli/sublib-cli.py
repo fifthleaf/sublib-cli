@@ -86,6 +86,18 @@ def get_new_path(file, form):
     return path
 
 
+def write_file(subtitle, file, form):
+    new = get_subtitle({
+        "format": form,
+        "path": "",
+        "encoding": ""
+    })
+    lines = subtitle.get_general_format()
+    new.set_from_general_format(lines)
+    with open(file["path"], "wt", encoding=file["encoding"]) as f:
+        f.writelines([f"{line}\n" for line in new.content])
+
+
 def main(path, form_to, log):
 
     path = os.path.normpath(path)
@@ -106,11 +118,13 @@ def main(path, form_to, log):
     for file in input_files:
         output_files.append({
             "path": get_new_path(file, form_to),
-            "encoding": file["encoding"],
-            "format": form_to
+            "encoding": file["encoding"]
         })
 
     input_subtitles = [get_subtitle(file) for file in input_files]
+
+    for subtitle, file in zip(input_subtitles, output_files):
+        write_file(subtitle, file, form_to)
 
 
 if __name__ == "__main__":
