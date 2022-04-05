@@ -11,7 +11,7 @@ import chardet
 def parser():
     arg_parser = argparse.ArgumentParser(
         usage=f"{os.path.basename(__file__)} "
-              f"[--help] [path form_to [--log <file>]]",
+              f"[--help] [--log [file]] path form",
         description="CLI implementation of Sublib package.",
         epilog="Supported formats: mpl, srt, sub, tmp",
         formatter_class=lambda prog: argparse.HelpFormatter(
@@ -23,25 +23,25 @@ def parser():
         "path",
         type=str,
         metavar="path",
-        help="Directory or single file to convert"
+        help="Directory or file to convert"
     )
     arg_parser.add_argument(
-        "form_to",
+        "form",
         type=str,
         choices=["mpl", "srt", "sub", "tmp"],
-        metavar="form_to",
-        help="Target format"
+        metavar="form",
+        help="Desired format"
     )
     arg_parser.add_argument(
         "-l", "--log",
         type=str,
         nargs="?",
         const=f"{os.path.splitext(__file__)[0]}.log",
-        metavar="log",
-        help="Enable logging. Optionally takes a file"
+        metavar="file",
+        help="Enable logging"
     )
     args = arg_parser.parse_args()
-    return (args.path, args.form_to, args.log)
+    return (args.path, args.form, args.log)
 
 
 def set_logger(file, level):
@@ -80,15 +80,17 @@ def detect_encoding(file):
 
 
 def get_subtitle(subtitle):
-    data = (subtitle["path"], subtitle["encoding"])
-    if subtitle["format"] == "mpl":
-        subtitle = sublib.MPlayer2(*data)
-    elif subtitle["format"] == "srt":
-        subtitle = sublib.SubRip(*data)
-    elif subtitle["format"] == "sub":
-        subtitle = sublib.MicroDVD(*data)
-    elif subtitle["format"] == "tmp":
-        subtitle = sublib.TMPlayer(*data)
+    form = subtitle["format"]
+    path = subtitle["path"]
+    encd = subtitle["encoding"]
+    if form == "mpl":
+        subtitle = sublib.MPlayer2(path, encd)
+    elif form == "srt":
+        subtitle = sublib.SubRip(path, encd)
+    elif form == "sub":
+        subtitle = sublib.MicroDVD(path, encd)
+    elif form == "tmp":
+        subtitle = sublib.TMPlayer(path, encd)
     return subtitle
 
 
@@ -116,7 +118,7 @@ def write_file(subtitle, file, form, logger):
     logger.info(f"Saved: {os.path.basename(file['path'])}")
 
 
-def main(path, form_to, log):
+def main(path, form, log):
 
     start = timeit.default_timer()
 
@@ -153,7 +155,7 @@ def main(path, form_to, log):
     output_files = []
     for file in input_files:
         output_files.append({
-            "path": get_new_path(file, form_to),
+            "path": get_new_path(file, form),
             "encoding": file["encoding"]
         })
 
@@ -165,11 +167,11 @@ def main(path, form_to, log):
     input_subtitles = [get_subtitle(file) for file in input_files]
 
     for subtitle, file in zip(input_subtitles, output_files):
-        write_file(subtitle, file, form_to, logger)
+        write_file(subtitle, file, form, logger)
 
     stop = timeit.default_timer()
 
-    logger.info(f"Execution time: {stop-start}")
+    logger.info(f"Execution time: {stop-start}s")
     logger.info("END")
 
     logging.shutdown()
