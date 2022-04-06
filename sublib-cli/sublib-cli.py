@@ -150,7 +150,11 @@ def write_file(subtitle, file, form, logger):
     logger.info(f"Saved: {os.path.basename(file['path'])}")
 
 
-def main(path, form, log):
+def main(arguments):
+
+    command = arguments.command
+    path = arguments.path
+    log = arguments.log
 
     start = timeit.default_timer()
 
@@ -171,35 +175,39 @@ def main(path, form, log):
     else:
         logger.info(f"Path: {path}")
 
-    input_files = []
-    for file in find_files(path):
-        input_files.append({
-            "path": file,
-            "encoding": detect_encoding(file),
-            "format": sublib.detect(file, detect_encoding(file))
-        })
+    if command == "convert":
 
-    logger.info(
-        f"Input files: "
-        f"{[os.path.basename(file['path']) for file in input_files]}"
-    )
+        form = arguments.form
 
-    output_files = []
-    for file in input_files:
-        output_files.append({
-            "path": get_new_path(file, form),
-            "encoding": file["encoding"]
-        })
+        input_files = []
+        for file in find_files(path):
+            input_files.append({
+                "path": file,
+                "encoding": detect_encoding(file),
+                "format": sublib.detect(file, detect_encoding(file))
+            })
 
-    logger.info(
-        f"Output files: "
-        f"{[os.path.basename(file['path']) for file in output_files]}"
-    )
+        logger.info(
+            f"Input files: "
+            f"{[os.path.basename(file['path']) for file in input_files]}"
+        )
 
-    input_subtitles = [get_subtitle(file) for file in input_files]
+        output_files = []
+        for file in input_files:
+            output_files.append({
+                "path": get_new_path(file, form),
+                "encoding": file["encoding"]
+            })
 
-    for subtitle, file in zip(input_subtitles, output_files):
-        write_file(subtitle, file, form, logger)
+        logger.info(
+            f"Output files: "
+            f"{[os.path.basename(file['path']) for file in output_files]}"
+        )
+
+        input_subtitles = [get_subtitle(file) for file in input_files]
+
+        for subtitle, file in zip(input_subtitles, output_files):
+            write_file(subtitle, file, form, logger)
 
     stop = timeit.default_timer()
 
@@ -214,7 +222,7 @@ def main(path, form, log):
 if __name__ == "__main__":
 
     try:
-        main(*parser())
+        main(parser())
     except Exception:
         print("An unknown error has occurred:")
         print(sys.exc_info())
