@@ -11,28 +11,17 @@ import chardet
 def parser():
     arg_parser = argparse.ArgumentParser(
         usage=f"{os.path.basename(__file__)} "
-              f"[--help] [--log [file]] path form",
+              f"[--help] {{convert, detect}} ...",
         description="CLI implementation of Sublib package.",
-        epilog="Supported formats: mpl, srt, sub, tmp",
-        formatter_class=lambda prog: argparse.HelpFormatter(
-            prog,
-            max_help_position=52
-        )
+        epilog="Supported formats: mpl, srt, sub, tmp"
     )
-    arg_parser.add_argument(
-        "path",
-        type=str,
-        metavar="path",
-        help="Directory or file to convert"
+    subparsers = arg_parser.add_subparsers(
+        dest="command"
     )
-    arg_parser.add_argument(
-        "form",
-        type=str,
-        choices=["mpl", "srt", "sub", "tmp"],
-        metavar="form",
-        help="Desired format"
+    base_parser = argparse.ArgumentParser(
+        add_help=False
     )
-    arg_parser.add_argument(
+    base_parser.add_argument(
         "-l", "--log",
         type=str,
         nargs="?",
@@ -40,8 +29,51 @@ def parser():
         metavar="file",
         help="Enable logging"
     )
-    args = arg_parser.parse_args()
-    return (args.path, args.form, args.log)
+    convert_parser = subparsers.add_parser(
+        "convert",
+        usage=f"{os.path.basename(__file__)} "
+              f"[--help] [--log [file]] convert path form",
+        description="Convert subtitles to given format",
+        help="Convert subtitles to given format",
+        parents=[base_parser],
+        formatter_class=lambda prog: argparse.HelpFormatter(
+            prog,
+            max_help_position=52
+        )
+    )
+    convert_parser.add_argument(
+        "path",
+        type=str,
+        metavar="path",
+        help="Directory or file to convert"
+    )
+    convert_parser.add_argument(
+        "form",
+        type=str,
+        choices=["mpl", "srt", "sub", "tmp"],
+        metavar="form",
+        help="Desired format"
+    )
+    detect_parser = subparsers.add_parser(
+        "detect",
+        usage=f"{os.path.basename(__file__)} "
+              f"[--help] [--log [file]] detect path",
+        description="Detect subtitle format of file",
+        help="Detect subtitle format of file",
+        parents=[base_parser],
+        formatter_class=lambda prog: argparse.HelpFormatter(
+            prog,
+            max_help_position=52
+        )
+    )
+    detect_parser.add_argument(
+        "path",
+        type=str,
+        metavar="path",
+        help="File to be analyzed"
+    )
+    arguments = arg_parser.parse_args()
+    return arguments
 
 
 def set_logger(file, level):
