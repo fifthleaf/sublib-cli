@@ -209,6 +209,24 @@ def main(arguments):
         for subtitle, file in zip(input_subtitles, output_files):
             write_file(subtitle, file, form, logger)
 
+    elif command == "detect":
+
+        for file in find_files(path):
+
+            encoding = detect_encoding(file)
+            form = sublib.detect(file, encoding)
+
+            forms = {
+                "mpl": "MPlayer2",
+                "srt": "SubRip",
+                "sub": "MicroDVD",
+                "tmp": "TMPlayer",
+                "undefined": "Unknown"
+            }
+
+            logger.info(f"{os.path.basename(file)} is in {forms[form]} format")
+            print(f"{os.path.basename(file)} is in {forms[form]} format")
+
     stop = timeit.default_timer()
 
     logger.info(f"Execution time: {stop-start}s")
