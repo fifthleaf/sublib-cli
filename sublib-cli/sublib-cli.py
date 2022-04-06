@@ -70,7 +70,7 @@ def parser():
         "path",
         type=str,
         metavar="path",
-        help="File to be analyzed"
+        help="Directory or file to be analyzed"
     )
     arguments = arg_parser.parse_args()
     return arguments
@@ -150,6 +150,15 @@ def write_file(subtitle, file, form, logger):
     logger.info(f"Saved: {os.path.basename(file['path'])}")
 
 
+def end(logger, log, start):
+    stop = timeit.default_timer()
+    logger.info(f"Execution time: {stop-start}s")
+    logger.info("END")
+    logging.shutdown()
+    if not os.path.getsize(log):
+        os.remove(log)
+
+
 def main(arguments):
 
     command = arguments.command
@@ -169,11 +178,12 @@ def main(arguments):
 
     logger.info("START")
 
-    if os.path.exists(path) is False:
-        logger.critical(f"Path does not exists: {path}")
-        sys.exit(f"Path does not exists: {path}")
-    else:
+    if os.path.exists(path):
         logger.info(f"Path: {path}")
+    else:
+        logger.critical(f"Path does not exists: {path}")
+        end(logger, log, start)
+        sys.exit(f"Path does not exists: {path}")
 
     if command == "convert":
 
@@ -224,17 +234,11 @@ def main(arguments):
                 "undefined": "Unknown"
             }
 
-            logger.info(f"{os.path.basename(file)} is in {forms[form]} format")
-            print(f"{os.path.basename(file)} is in {forms[form]} format")
+            message = f"{os.path.basename(file)} is in {forms[form]} format"
+            logger.info(message)
+            print(message)
 
-    stop = timeit.default_timer()
-
-    logger.info(f"Execution time: {stop-start}s")
-    logger.info("END")
-
-    logging.shutdown()
-    if os.path.getsize(log) == 0:
-        os.remove(log)
+    end(logger, log, start)
 
 
 if __name__ == "__main__":
