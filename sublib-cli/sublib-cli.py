@@ -9,6 +9,17 @@ import chardet
 
 
 def parser():
+    """
+    Parse CLI arguments.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    ----------
+    Arguments values.
+    """
     arg_parser = argparse.ArgumentParser(
         usage=f"{os.path.basename(__file__)} "
               f"[--help] {{convert, detect}} ...",
@@ -77,6 +88,20 @@ def parser():
 
 
 def set_logger(file, level):
+    """
+    Configure logging system.
+
+    Parameters
+    ----------
+    file
+        Path to a log file.
+    level
+        Representation of logging level.
+
+    Returns
+    ----------
+    Logger object.
+    """
     file = os.path.normpath(file)
     file = os.path.abspath(file)
     logging.basicConfig(
@@ -92,6 +117,18 @@ def set_logger(file, level):
 
 
 def find_files(path):
+    """
+    Search for files in a path.
+
+    Parameters
+    ----------
+    path
+        Path to dir or subtitle file.
+
+    Returns
+    ----------
+    Found files.
+    """
     if os.path.isfile(path):
         files = [path]
     if os.path.isdir(path):
@@ -104,6 +141,18 @@ def find_files(path):
 
 
 def detect_encoding(file):
+    """
+    Detect file encoding.
+
+    Parameters
+    ----------
+    file
+        Path to a file.
+
+    Returns
+    ----------
+    Detected encoding.
+    """
     with open(file, "rb") as f:
         file_content = f.read()
     result = chardet.detect(file_content)
@@ -112,6 +161,18 @@ def detect_encoding(file):
 
 
 def get_subtitle(subtitle):
+    """
+    Create Subtitle class instance.
+
+    Parameters
+    ----------
+    subtitle
+        Subtitle details.
+
+    Returns
+    ----------
+    Specific subtitle object.
+    """
     form = subtitle["format"]
     path = subtitle["path"]
     encd = subtitle["encoding"]
@@ -127,6 +188,20 @@ def get_subtitle(subtitle):
 
 
 def get_new_path(file, form):
+    """
+    Create path to desired subtitle file.
+
+    Parameters
+    ----------
+    file
+        Subtitle details.
+    form
+        Desired subtitle format.
+
+    Returns
+    ----------
+    New subtitle file path.
+    """
     path = file["path"]
     path = path[:path.rfind(".")]
     if form in ("mpl", "tmp"):
@@ -137,6 +212,24 @@ def get_new_path(file, form):
 
 
 def write_file(subtitle, file, form, logger):
+    """
+    Write converted subtitle to new file.
+
+    Parameters
+    ----------
+    subtitle
+        Specific subtitle class.
+    file
+        Subtitle details.
+    form
+        Desired subtitle format.
+    logger
+        Logger object.
+
+    Returns
+    ----------
+    None
+    """
     new = get_subtitle({
         "format": form,
         "path": "",
@@ -146,35 +239,51 @@ def write_file(subtitle, file, form, logger):
     new.set_from_general_format(lines)
     logger.info(f"Converted: {os.path.basename(subtitle.path)}")
     with open(file["path"], "wt", encoding=file["encoding"]) as f:
-        f.writelines([f"{line}\n" for line in new.content])
+        f.writelines(f"{line}\n" for line in new.content)
     logger.info(f"Saved: {os.path.basename(file['path'])}")
 
 
-def end(logger, log, start):
+def end(logger, logfile, start):
+    """
+    End executing of script.
+
+    Parameters
+    ----------
+    logger
+        Logger object.
+    logfile
+        Path to log file.
+    start
+        Script start time.
+
+    Returns
+    ----------
+    None
+    """
     stop = timeit.default_timer()
     logger.info(f"Execution time: {stop-start}s")
     logger.info("END")
     logging.shutdown()
-    if not os.path.getsize(log):
-        os.remove(log)
+    if not os.path.getsize(logfile):
+        os.remove(logfile)
 
 
 def main(arguments):
 
     command = arguments.command
     path = arguments.path
-    log = arguments.log
+    logfile = arguments.log
 
     start = timeit.default_timer()
 
     path = os.path.normpath(path)
     path = os.path.abspath(path)
 
-    if log:
-        logger = set_logger(log, logging.INFO)
+    if logfile:
+        logger = set_logger(logfile, logging.INFO)
     else:
-        log = f"{os.path.splitext(__file__)[0]}.log"
-        logger = set_logger(log, logging.CRITICAL)
+        logfile = f"{os.path.splitext(__file__)[0]}.log"
+        logger = set_logger(logfile, logging.CRITICAL)
 
     logger.info("START")
 
@@ -182,7 +291,7 @@ def main(arguments):
         logger.info(f"Path: {path}")
     else:
         logger.critical(f"Path does not exists: {path}")
-        end(logger, log, start)
+        end(logger, logfile, start)
         sys.exit(f"Path does not exists: {path}")
 
     if command == "convert":
@@ -238,7 +347,7 @@ def main(arguments):
             logger.info(message)
             print(message)
 
-    end(logger, log, start)
+    end(logger, logfile, start)
 
 
 if __name__ == "__main__":
