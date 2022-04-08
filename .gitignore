@@ -1,7 +1,6 @@
 # Testing
 .tox
 .pytest_cache
-tests_files
 
 # Packaging
 dist
@@ -12,6 +11,3 @@ __pycache__
 
 # Environments
 venv
-
-# Other
-sub_converter.exe
