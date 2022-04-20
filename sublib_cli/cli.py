@@ -8,7 +8,7 @@ import sublib
 import chardet
 
 
-def parser():
+def parser() -> argparse.Namespace:
     """
     Parse CLI arguments.
 
@@ -87,7 +87,7 @@ def parser():
     return arguments
 
 
-def set_logger(file, level):
+def set_logger(file: str, level: int) -> logging.Logger:
     """
     Configure logging system.
 
@@ -116,7 +116,7 @@ def set_logger(file, level):
     return logger
 
 
-def find_files(path):
+def find_files(path: str) -> list:
     """
     Search for files in a path.
 
@@ -140,7 +140,7 @@ def find_files(path):
     return files
 
 
-def detect_encoding(file):
+def detect_encoding(file: str) -> str:
     """
     Detect file encoding.
 
@@ -160,7 +160,7 @@ def detect_encoding(file):
     return result
 
 
-def get_subtitle(subtitle):
+def get_subtitle(subtitle: dict) -> sublib.Subtitle:
     """
     Create Subtitle class instance.
 
@@ -187,7 +187,7 @@ def get_subtitle(subtitle):
     return subtitle
 
 
-def get_new_path(file, form):
+def get_new_path(file: dict, form: str) -> str:
     """
     Create path to desired subtitle file.
 
@@ -211,7 +211,8 @@ def get_new_path(file, form):
     return path
 
 
-def write_file(subtitle, file, form, logger):
+def write_file(subtitle: sublib.Subtitle, file: dict,
+               form: str, logger: logging.Logger):
     """
     Write converted subtitle to new file.
 
@@ -243,7 +244,7 @@ def write_file(subtitle, file, form, logger):
     logger.info(f"Saved: {os.path.basename(file['path'])}")
 
 
-def end(logger, logfile, start):
+def end(logger: logging.Logger, logfile: str, start: float):
     """
     End executing of script.
 
@@ -268,7 +269,7 @@ def end(logger, logfile, start):
         os.remove(logfile)
 
 
-def main(arguments):
+def main(arguments: argparse.Namespace):
 
     command = arguments.command
     path = arguments.path
