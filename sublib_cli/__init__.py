@@ -36,8 +36,8 @@ FUNCTONS
         Write converted subtitle to new file.
 """
 
-from sublib_cli.cli import parser, set_logger, find_files
-from sublib_cli.cli import detect_encoding, get_subtitle, get_new_path
-from sublib_cli.cli import write_file, end, main
+from sublib_cli.sublib_cli import parser, set_logger, find_files
+from sublib_cli.sublib_cli import detect_encoding, get_subtitle, get_new_path
+from sublib_cli.sublib_cli import write_file, end, main
 
 __version__ = "1.3.0"
