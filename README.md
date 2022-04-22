@@ -13,9 +13,9 @@ Features
 - Convert subtitles formats
 
 ## Installation
-Users on all platforms can use [python](https://github.com/TheFifthLeaf/sublib-cli/blob/main/sublib_cli/sublib_cli.py) script. For Windows users there is also [executable](https://github.com/TheFifthLeaf/sublib-cli/releases/download/1.3.0/sublib-cli.exe) version made with [pyinstaller](https://github.com/pyinstaller/pyinstaller).  
+Users on all platforms can use [python](https://github.com/TheFifthLeaf/sublib-cli/blob/main/sublib_cli/sublib_cli.py) script. For Windows users there is also [executable](https://github.com/TheFifthLeaf/sublib-cli/releases/download/v1.3.0/sublib-cli.exe) version made with [pyinstaller](https://github.com/pyinstaller/pyinstaller).  
 
-If you are developer please download whole project via `git clone` or [archive](https://github.com/TheFifthLeaf/sublib-cli/releases/tag/1.3.0).
+If you are developer please download whole project via `git clone` or [archive](https://github.com/TheFifthLeaf/sublib-cli/releases/tag/v1.3.0).
 
 Remember to install dependencies! \
 **User**: ```pip install -r requirements.txt``` \
