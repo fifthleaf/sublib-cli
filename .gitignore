@@ -11,3 +11,6 @@ __pycache__
 
 # Environments
 venv
+
+# Executable
+sublib-cli.exe
