@@ -1,5 +1,4 @@
 chardet==4.0.0
 sublib==1.2.0
-coverage==6.2
 pytest==7.0.0
 pytest-mock==3.6.0
