@@ -1,96 +1,87 @@
-# <img src="img/logo.png" alt="Offline Sub Converter logo">
+# Sublib-CLI
 
-<p align="center">The CLI script made with Python for easy conversion of subtitles files.</p>
+[![Release](https://img.shields.io/github/v/release/TheFifthLeaf/sublib-cli?color=3C7DD9)](https://github.com/TheFifthLeaf/sublib-cli/releases)
+[![Min. Python version](https://img.shields.io/badge/python-3.6%2B-3C7DD9)](https://www.python.org/downloads/)
+[![License GPLv3](https://img.shields.io/badge/license-GPL%20V3-3C7DD9)](https://choosealicense.com/licenses/gpl-3.0/)
+[![Code quality](https://img.shields.io/codefactor/grade/github/TheFifthLeaf/sublib-cli/main?color=3C7DD9)](https://www.codefactor.io/repository/github/thefifthleaf/sublib-cli)
+[![Tests](https://github.com/TheFifthLeaf/sublib-cli/actions/workflows/tests.yml/badge.svg)](https://github.com/TheFifthLeaf/sublib-cli/actions/workflows/tests.yml)
 
-<p  align="center">
-	<a style="text-decoration:none" href="https://github.com/TheFifthLeaf/offline-sub-converter/releases">
-		<img src="https://img.shields.io/github/v/release/TheFifthLeaf/offline-sub-converter?color=3C7DD9" alt="Releases">
-	</a>
-	<a style="text-decoration:none" href="https://www.python.org/downloads/">
-		<img src="https://img.shields.io/badge/python-3.6%2B-3C7DD9" alt="Python Version">
-	</a>
-	<a style="text-decoration:none" href="https://choosealicense.com/licenses/gpl-3.0/">
-		<img src="https://img.shields.io/badge/license-GPL%20V3-3C7DD9" alt="License GPLv3">
-	</a>
-	<a href="https://www.codefactor.io/repository/github/thefifthleaf/offline-sub-converter">
-		<img src="https://img.shields.io/codefactor/grade/github/TheFifthLeaf/offline-sub-converter/main?color=3C7DD9" alt="CodeFactor" />
-	</a>
-</p>
+CLI implementation of the [sublib](https://github.com/TheFifthLeaf/sublib) package.
+
+Features
+- Detect used format
+- Convert subtitles formats
 
 ## Installation
+Users on all platforms can use [python](https://github.com/TheFifthLeaf/sublib-cli/blob/main/sublib_cli/sublib_cli.py) script. For Windows users there is also [executable](https://github.com/TheFifthLeaf/sublib-cli/releases/download/1.3.0/sublib-cli.exe) version made with [pyinstaller](https://github.com/pyinstaller/pyinstaller).  
 
-You will need an external module to use the .py script.
-- chardet
+If you are developer please download whole project via `git clone` or [archive](https://github.com/TheFifthLeaf/sublib-cli/releases/tag/1.3.0).
 
-You can install it throught the requirements file.
+Remember to install dependencies! \
+**User**: ```pip install -r requirements.txt``` \
+**Developer**: ```pip install -r requirements_dev.txt```
 
+## Testing
+Perform the tests with `pytest` and `pytest-mock`.
 ```bash
-pip install -r requirements.txt
+python -m pytest tests
 ```
-
-If the installation fails due to lack of access rights, try this.
-
-```bash
-pip install --user -r requirements.txt
-```
-
-**However, feel free to use the portable .exe file, which does not require additional installations.**
 
 ## Usage
-
-To convert using .exe, please type:
-
+To check your current format:
 ```bash
-sub_converter [--help] [path form_to [--log <file>]]
+python sublib_cli.py detect <path>
+```
+To convert subtitles to a different format:
+```bash
+python sublib_cli.py convert <path> <format>
+```
+For more help:
+```bash
+python sublib_cli.py --help
 ```
 
-And using .py, type:
-
+### Examples
+This will display format of the specified subtitle file.
 ```bash
-python sub_converter.py [--help] [path form_to [--log <file>]]
+python sublib_cli.py detect "D:\Video\Se7en.txt"
 ```
-
-### Usage example
-
-This will display help information. You can also use short "-h".
+This will display format for each subtitle file in Video directory.
 ```bash
-sub_converter --help
+python sublib_cli.py detect "D:\Video"
 ```
 This will convert the specified file to SubRip format.
 ```bash
-sub_converter "D:\Video\Se7en.sub" srt
+python sublib_cli.py convert "D:\Video\Se7en.sub" srt
 ```
 This will convert all the subtitle files in the Video directory to MicroDVD format.
 ```bash
-sub_converter "D:\Video" sub
+python sublib_cli.py convert "D:\Video" sub
 ```
 This will convert all the subtitle files in the current folder to MPlayer2 format.
 ```bash
-sub_converter "." mpl
+python sublib_cli.py convert "." mpl
 ```
 ### Logging
-By default, the program creates logs only when it encounters a fatal error. You can change it as follows:
+By default, the program creates logs only when it encounters a fatal error. You can this behavior using `log` flag. 
 
-This will additionally create a log file. You can also use short "-l".
+To log into the default file:
 ```bash
-sub_converter "D:\Video\Se7en.sub" srt --log
+python sublib_cli.py convert "D:\Video\Se7en.sub" srt --log
 ```
-This will create a specified log file. You can also use short "-l".
+To log to a specific file:
 ```bash
-sub_converter "D:\Video\Se7en.sub" srt --log "mylog.log"
+python sublib_cli.py detect "D:\Video\Se7en.sub" --log "mylog.log"
 ```
 
-## Supported formats
-
-- as **srt** - SubRip (.srt)
-- as **sub** - MicroDVD (.sub)
-- as **mpl** - MPlayer2 (.txt)
-- as **tmp** - TMPlayer (.txt)
+## Formats
+Supported:
+| Full name | Short name | Default ext. |
+|:---------:|:----------:|:------------:|
+| MPlayer2  | mpl        | .txt         |
+| SubRip    | srt        | .srt         |
+| MicroDVD  | sub        | .sub         |
+| TMPlayer  | tmp        | .txt         |
 
 ## Contributing
-
-Pull requests are welcome.
-
-## License
-
-[GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
+Pull requests are welcome!
